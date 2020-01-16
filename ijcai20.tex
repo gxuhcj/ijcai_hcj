@@ -115,7 +115,7 @@
 
 \section{Method}
 \paragraph{Definition} 
-In a distributed environment,we adopt the sparse space-time tracklets sampling(SSTT)~\cite{li2018unsupervised} to sample the training tracklets from each camera. Each tracklet is represented as$\left \{t_{n}^{m}, y_{n}^{m}, g_{n}^{m}\right \}$, where $t_{n}^{m}$ means the $n$-th tracklet in $m$-th camera.Denoting $t_{n}^{m}=\left \{  I_{1}^{t_{n}^{m}},  I_{2}^{t_{n}^{m}},...,I_{k}^{t_{n}^{m}} \right \}$, where $I_{k}^{t_{n}^{m}}$ is the $k$-th image of the $n$-th tracklet in $m$-th camera. Each tracklet has two labels, one is a local label and the other is a global label.The local label is represented by $y_{n}^{m}$, whenever the edge device collects new tracklet data, it will automatically be assigned a local label, local labels are distinguishable only in local data and will be used for random walk training. The global label is represented by $g_{n}^{m}$, when distributed clustering is completed, each tracklet will obtain a global label, global labels are distinguishable in global data and will be used for incremental training.
+In a distributed environment,we adopt the sparse space-time tracklets sampling(SSTT)~\cite{li2018unsupervised} to sample the training tracklets from each camera. Each tracklet is represented as$\left \{t_{n}^{m}, y_{n}^{m}, g_{n}^{m}\right \}$, where $t_{n}^{m}$ means the $n$-th tracklet in $m$-th camera.Denoting $t_{n}^{m}=\left \{  I_{1}^{t_{n}^{m}},  I_{2}^{t_{n}^{m}},...,I_{k}^{t_{n}^{m}} \right \}$, where $I_{k}^{t_{n}^{m}}$ is the $k$-th image of the $n$-th tracklet in $m$-th camera. Each tracklet has two labels, one is a local label and the other is a global label.The local label is represented by $y_{n}^{m}$, whenever the edge device collects new tracklet data, it will automatically be assigned a local label, local labels are distinguishable only in local data and will be used for random walk training. The global label is represented by $g_{n}^{m}$, when distributed clustering is completed, each tracklet will obtain a global label, global labels are distinguishable in global data and will be used for incremental training.$f_{model}$ is the CNN model to extract high-dimensional features of input images.
 
 \subsection{Single Camera style Transfer}
 In order to minimize the negative impact of non-Independent and identically distributed(non-IID) in the distributed environment on model performance, each edge device will transform the locally collected data to the target domain through the style transfer. When each edge device is initialized, it will obtain the same pedestrian data as the target domain data for style transfer. Fig.3 describes the above process. we adopt Cycle-GAN~\cite{zhu2017unpaired} as the style transfer model. Given two different domains $A$ and $B$, the goal of Cycle-GAN is to train two mapping networks $G$ and $F$ so that the distribution of $G(A)$ is as close as possible to the distribution of B and the distribution of $F(B)$ is as close as possible The distribution of A, The overall CycleGAN loss function is expressed as:
@@ -133,13 +133,29 @@ where $\upsilon_{GAN}(G,D_{B},A,B)$ and $\upsilon_{GAN}(F,D_{A},B,A)$ are the ad
     &+E_{y\sim p_{y}} \left [ \left \| G(y) - y \right \|_{1} \right ]
 \end{aligned}
 \end{equation}
-
+where $x\in A$ and $y\in B$
 \subsection{Random Walk Training}
-...
+In the edge computing environment, image data is not allowed to be transmitted between edge devices, and only model data or high-dimensional feature vectors are allowed to be transmitted. For this scenario, we proposed random walk training method. The model walks randomly between edge devices, every time it reaches a edge devices, it will train with local data.
+
+We consider the model training on a single edge device as a classification problem~\cite{zheng2016person}, but each edge device only contains data with local labels, so whenever the model walks to a certain edge device, the model classification layer needs to be re-initialized according to the local data category to optimize the cross-entropy loss. the cross-entropy loss is formulated as:
+\begin{equation}
+\begin{aligned}
+    \nu _{local}=-\frac{1}{\sum_{n=1}^{N} K_{n}}\sum_{n=1}^{N}\sum_{k=1}^{K_{n}}\log p(y_{n}^{m}\mid I_{k}^{t_{n}^{m}})
+\end{aligned}
+\end{equation}
+where $N$ is the number of local tracklets and $K_{n}$ is the number of images each tracklet contains. $p(y_{n}^{m}\mid I_{k}^{t_{n}^{m}})$ is the predicted probability that the image $I_{k}^{t_{n}^{m}}$ belongs to $y_{n}^{m}$, which is obtained by the classification module.
+
+
+The model initialized on each edge device is ResNet-50 pre-trained on ImageNet, we fix the first two residual layers of ResNet-50 to save computing costs. At the same time, the classification layer of the network will re-initialize the weights for training on each edge device based on local data, so as shown in the fig.n, the model of random walk between edge devices is only the middle part of the entire network structure.
+
 \subsection{Distributed Clustering}
-...
+\paragraph{Memory Bank}
+\paragraph{Relation Graph}
+\paragraph{Triangle Relation}
+\paragraph{Global Label}
+
 \subsection{Incremental Training}
-....
+...
 \subsection{Global Model Unification}
 ...
 \section{Experiment}
@@ -161,9 +177,9 @@ We use ResNet-50~\cite{he2016deep} pre-trained on ImageNet~\cite{deng2009imagene
 We use ResNet50 pre-trained on ImageNet as the experimental baseline.
 
 \subsection{Parameter Analysis}
-We first perform a sensitivity analysis on the hyper-parameter in our experiments.As mentioned in 3.4, the indicator of whether the two memories are of the same type in the clustering process is that they form at least $\alpha$ triangles in the relationship network. We will experiment with different $\alpha$ values in different datasets to detect clustering effects.
+We first perform a sensitivity analysis on the hyper-parameter in our experiments.As mentioned in 3.4, the indicator of whether the two memories are of the same type in the clustering process is that they form at least $\alpha$ triangles in the relationship graph. We will experiment with different $\alpha$ values in different datasets to detect clustering effects.
 
-Fig 3.1 shows the clustering results when the value of $\alpha$ is 0, 1, 2, 3 on the three datasets of market, duke, and mars. The results show that when the value of $\alpha$ is larger, it is difficult for most memories to establish connected edges with other memories in the relationship network and that means we will get more categories.When $\alpha$ is set to 0, the number of categories after clustering is less than the actual number of categories on all three datasets. Figure 3.2 shows the performance of the model after incremental training using the corresponding clustering results. The performance is optimal when $\alpha$ = 1 on the market dataset, the best performance is $\alpha$ = 2 on the duke dataset, and on the mars dataset, the performance is optimal when $\alpha$ = 1. On three datasets, when $\alpha$ = 0, the effect is worse than before the incremental training, which proves that the clustering has no effect.
+Fig 3.1 shows the clustering results when the value of $\alpha$ is 0, 1, 2, 3 on the three datasets of market, duke, and mars. The results show that when the value of $\alpha$ is larger, it is difficult for most memories to establish connected edges with other memories in the relationship graph and that means we will get more categories.When $\alpha$ is set to 0, the number of categories after clustering is less than the actual number of categories on all three datasets. Figure 3.2 shows the performance of the model after incremental training using the corresponding clustering results. The performance is optimal when $\alpha$ = 1 on the market dataset, the best performance is $\alpha$ = 2 on the duke dataset, and on the mars dataset, the performance is optimal when $\alpha$ = 1. On three datasets, when $\alpha$ = 0, the effect is worse than before the incremental training, which proves that the clustering has no effect.
 
 
 \subsection{Evaluation}
