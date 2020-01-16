@@ -115,7 +115,7 @@
 
 \section{Method}
 \paragraph{Definition} 
-In a distributed environment,we adopt the sparse space-time tracklets sampling(SSTT)~\cite{li2018unsupervised} to sample the training tracklets from each camera. Each tracklet is represented as$\left \{t_{n}^{m}, y_{n}^{m}, g_{n}^{m}\right \}$, where $t_{n}^{m}$ means the $n$-th tracklet in $m$-th camera.Denoting $t_{n}^{m}=\left \{  I_{1}^{t_{n}^{m}},  I_{2}^{t_{n}^{m}},...,I_{k}^{t_{n}^{m}} \right \}$, where $I_{k}^{t_{n}^{m}}$ is the $k$-th image of the $n$-th tracklet in $m$-th camera. Each tracklet has two labels, one is a local label and the other is a global label.The local label is represented by $y_{n}^{m}$, whenever the edge device collects new tracklet data, it will automatically be assigned a local label, local labels are distinguishable only in local data and will be used for random walk training. The global label is represented by $g_{n}^{m}$, when distributed clustering is completed, each tracklet will obtain a global label, global labels are distinguishable in global data and will be used for incremental training.$f_{model}$ is the CNN model to extract high-dimensional features of input images.
+In a distributed environment,we adopt the sparse space-time tracklets sampling(SSTT)~\cite{li2018unsupervised} to sample the training tracklets from each camera. Each tracklet is represented as$\left \{t_{n}^{m}, y_{n}^{m}, g_{n}^{m}\right \}$, where $t_{n}^{m}$ means the $n$-th tracklet in $m$-th camera.Denoting $t_{n}^{m}=\left \{  I_{1}^{t_{n}^{m}},  I_{2}^{t_{n}^{m}},...,I_{k}^{t_{n}^{m}} \right \}$, where $I_{k}^{t_{n}^{m}}$ is the $k$-th image of the $n$-th tracklet in $m$-th camera. Each tracklet has two labels, one is a local label and the other is a global label.The local label is represented by $y_{n}^{m}$, whenever the edge device collects new tracklet data, it will automatically be assigned a local label, local labels are distinguishable only in local data and will be used for random walk training. The global label is represented by $g_{n}^{m}$, when distributed clustering is completed, each tracklet will obtain a global label, global labels are distinguishable in global data and will be used for incremental training.$f_{model}$ is the person re-identically model to extract high-dimensional features of input images.
 
 \subsection{Single Camera style Transfer}
 In order to minimize the negative impact of non-Independent and identically distributed(non-IID) in the distributed environment on model performance, each edge device will transform the locally collected data to the target domain through the style transfer. When each edge device is initialized, it will obtain the same pedestrian data as the target domain data for style transfer. Fig.3 describes the above process. we adopt Cycle-GAN~\cite{zhu2017unpaired} as the style transfer model. Given two different domains $A$ and $B$, the goal of Cycle-GAN is to train two mapping networks $G$ and $F$ so that the distribution of $G(A)$ is as close as possible to the distribution of B and the distribution of $F(B)$ is as close as possible The distribution of A, The overall CycleGAN loss function is expressed as:
@@ -143,15 +143,27 @@ We consider the model training on a single edge device as a classification probl
     \nu _{local}=-\frac{1}{\sum_{n=1}^{N} K_{n}}\sum_{n=1}^{N}\sum_{k=1}^{K_{n}}\log p(y_{n}^{m}\mid I_{k}^{t_{n}^{m}})
 \end{aligned}
 \end{equation}
-where $N$ is the number of local tracklets and $K_{n}$ is the number of images each tracklet contains. $p(y_{n}^{m}\mid I_{k}^{t_{n}^{m}})$ is the predicted probability that the image $I_{k}^{t_{n}^{m}}$ belongs to $y_{n}^{m}$, which is obtained by the classification module.
+where $N$ is the number of local tracklets and $K_{n}$ is the number of images the $n$-th tracklet contains. $p(y_{n}^{m}\mid I_{k}^{t_{n}^{m}})$ is the predicted probability that the image $I_{k}^{t_{n}^{m}}$ belongs to $y_{n}^{m}$, which is obtained by the classification module.
 
 
 The model initialized on each edge device is ResNet-50 pre-trained on ImageNet, we fix the first two residual layers of ResNet-50 to save computing costs. At the same time, the classification layer of the network will re-initialize the weights for training on each edge device based on local data, so as shown in the fig.n, the model of random walk between edge devices is only the middle part of the entire network structure.
 
 \subsection{Distributed Clustering}
-\paragraph{Memory Bank}
-\paragraph{Relation Graph}
+\paragraph{Memory Bank}To mine relationships between cross-camera tracklets, we need to extract high-dimensional feature vectors for each trackle. We call the high-dimensional feature vector of each tracklet $memory$, the $memory$ is obtained as follows:
+\begin{equation}
+\begin{aligned}
+memory_{n}^{m} = \sum_{k=1}^{K_{n}}f_{model}(I_{k}^{t_{n}^{m}})
+\end{aligned}
+\end{equation}
+where $memory_{n}^{m}$ means the memory of the $n$-th tracklet in $m$-th camera. Each edge device will set a container to store the memory of all local tracklets, which we call $Memory Bank$. The $Memory Bank$ in the $m$-th camera is represented by $MB^{m}$, $MB^{m} = \left \{ memory_{n}^{m} \right \}_{n=1}^{N}$.
+\paragraph{Relationship Graph}As shown in Fig.3a, each memory can be regarded as a point in the feature space. Our goal is to mine the relationship between memories and find the memory belonging to the same person across cameras. Then we can use this cross-camera relationship to incremental training model. So we need to build a relationship graph between memories, if two memories belong to the same class, we will establish connecting edges for them in the relationship graph.
+
+
+We designed the method named $mutual \ top1$ to initialize the relationship graph. As shown in fig.3b, Suppose we have two memory banks from camera a and camera b, which named $MB^{a}$ and $MB^{b}$. $memory_{t}^{a}$ is the memory of the $t$-th tracklet in camera a and $memory_{k}^{b}$ is the memory of the $k$-th tracklet in camera b. We use the $L2$ distance to measure the pairwise similarities between $memory_{t}^{a}$ and all memories in $MB^{b}$ and also measure the pairwise similarities between $memory_{k}^{b}$ and all memories in $MB^{a}$.if $memory_{k}^{b}$ has the  minimal pairwise distance with $memory_{t}^{a}$ and  $memory_{t}^{a}$ has the minimal pairwise distance with $memory_{k}^{b}$, we say both of them satify $mutual \ top1$ and we will establish connecting edges for them in the relationship graph.
+
+
 \paragraph{Triangle Relation}
+
 \paragraph{Global Label}
 
 \subsection{Incremental Training}
