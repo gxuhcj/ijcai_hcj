@@ -115,19 +115,38 @@
 
 \section{Method}
 \paragraph{Definition} 
+In a distributed environment,we adopt the sparse space-time tracklets sampling(SSTT)~\cite{li2018unsupervised} to sample the training tracklets from each camera. Each tracklet is represented as$\left \{t_{n}^{m}, y_{n}^{m}, g_{n}^{m}\right \}$, where $t_{n}^{m}$ means the $n$-th tracklet in $m$-th camera.Denoting $t_{n}^{m}=\left \{  I_{1}^{t_{n}^{m}},  I_{2}^{t_{n}^{m}},...,I_{k}^{t_{n}^{m}} \right \}$, where $I_{k}^{t_{n}^{m}}$ is the $k$-th image of the $n$-th tracklet in $m$-th camera. Each tracklet has two labels, one is a local label and the other is a global label.The local label is represented by $y_{n}^{m}$, whenever the edge device collects new tracklet data, it will automatically be assigned a local label, local labels are distinguishable only in local data and will be used for random walk training. The global label is represented by $g_{n}^{m}$, when distributed clustering is completed, each tracklet will obtain a global label, global labels are distinguishable in global data and will be used for incremental training.
 
 \subsection{Single Camera style Transfer}
+In order to minimize the negative impact of non-Independent and identically distributed(non-IID) in the distributed environment on model performance, each edge device will transform the locally collected data to the target domain through the style transfer. When each edge device is initialized, it will obtain the same pedestrian data as the target domain data for style transfer. Fig.3 describes the above process. we adopt Cycle-GAN~\cite{zhu2017unpaired} as the style transfer model. Given two different domains $A$ and $B$, the goal of Cycle-GAN is to train two mapping networks $G$ and $F$ so that the distribution of $G(A)$ is as close as possible to the distribution of B and the distribution of $F(B)$ is as close as possible The distribution of A, The overall CycleGAN loss function is expressed as:
+\begin{equation}
+\begin{aligned}
+\upsilon (G,F,D_{A},D_{B})&=\upsilon_{GAN}(G,D_{B},A,B)\\
+&+\upsilon_{GAN}(F,D_{A},B,A)\\
+&+\lambda \upsilon_{cyc}(G,F)
+\end{aligned}
+\end{equation}
+where $\upsilon_{GAN}(G,D_{B},A,B)$ and $\upsilon_{GAN}(F,D_{A},B,A)$ are the adversarial loss. $\upsilon_{cyc}(G,F)$ is the cycle consistency loss. In order to ensure that the color of the image remains stable before and after the style transfer, we adopt the identity mapping loss~\cite{zhu2017unpaired}, which is expressed as:
+\begin{equation}
+\begin{aligned}
+    \upsilon_{identity}(G,F) & = E_{x\sim p_{x}} \left [ \left \| F(x) - x \right \|_{1} \right ]\\
+    &+E_{y\sim p_{y}} \left [ \left \| G(y) - y \right \|_{1} \right ]
+\end{aligned}
+\end{equation}
 
 \subsection{Random Walk Training}
-
-\subsection{subsection3}
-\subsection{subsection4}
-\subsection{subsection5}
-
+...
+\subsection{Distributed Clustering}
+...
+\subsection{Incremental Training}
+....
+\subsection{Global Model Unification}
+...
 \section{Experiment}
 \subsection{datasets}
 
-All experiments are evaluated on three large-scale image person re-identification datasets(Market-1501~\cite{zheng2015scalable}, DukeMTMC-reID~\cite{ristani2016performance,zheng2017unlabeled} and MSMT17~\cite{wei2018person} )and one video person re-identification dataset(Mars~\cite{zheng2016mars}). Performance is evaluated by the cumulative matching characteristic (CMC) and mean Average Precision (mAP).
+All experiments are evaluated on three large-scale image person re-identification datasets(Market-1501~\cite{zheng2015scalable}, DukeMTMC-reID~\cite{ristani2016performance,zheng2017unlabeled} and MSMT17~\cite{wei2018person} )and one video person re-identification dataset(Mars~\cite{zheng2016mars}). Performance is evaluated by the cumulative matching characteristic (CMC) and mean Average Precision (mAP).We adopt the experiments settings and tracklet sampling methods of TAUDL~\cite{li2018unsupervised} and UTAL~\cite{li2019unsupervised}.  For image datasets, we assume all images of a person in one camera are belong to a single tracklet. For video datasets,  the same person has multiple tracklets under a single camera, we randomly select one for training.
+
 
 \subsection{Experimental Setup}
 
