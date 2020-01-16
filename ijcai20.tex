@@ -1,0 +1,178 @@
+%%%% ijcai20.tex
+
+\typeout{IJCAI--PRICAI--20 Instructions for Authors}
+
+% These are the instructions for authors for IJCAI-20.
+
+\documentclass{article}
+\pdfpagewidth=8.5in
+\pdfpageheight=11in
+% The file ijcai20.sty is NOT the same than previous years'
+\usepackage{ijcai20}
+
+% Use the postscript times font!
+\usepackage{times}
+\usepackage{soul}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[small]{caption}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\urlstyle{same}
+
+% the following package is optional:
+%\usepackage{latexsym} 
+
+% See https://www.overleaf.com/learn/latex/theorems_and_proofs
+% for a nice explanation of how to define new theorems, but keep
+% in mind that the amsthm package is already included in this
+% template and that you must *not* alter the styling.
+\newtheorem{example}{Example}
+\newtheorem{theorem}{Theorem}
+
+% Following comment is from ijcai97-submit.tex:
+% The preparation of these files was supported by Schlumberger Palo Alto
+% Research, AT\&T Bell Laboratories, and Morgan Kaufmann Publishers.
+% Shirley Jowell, of Morgan Kaufmann Publishers, and Peter F.
+% Patel-Schneider, of AT\&T Bell Laboratories collaborated on their
+% preparation.
+
+% These instructions can be modified and used in other conferences as long
+% as credit to the authors and supporting agencies is retained, this notice
+% is not changed, and further modification or reuse is not restricted.
+% Neither Shirley Jowell nor Peter F. Patel-Schneider can be listed as
+% contacts for providing assistance without their prior permission.
+
+% To use for other conferences, change references to files and the
+% conference appropriate and use other authors, contacts, publishers, and
+% organizations.
+% Also change the deadline and address for returning papers and the length and
+% page charge instructions.
+% Put where the files are available in the appropriate places.
+
+\title{Unsupervised distributed edge computing person re-identification}
+
+% Single author syntax
+% \author{
+%     Christian Bessiere
+%     \affiliations
+%     CNRS, University of Montpellier, France
+%     \emails
+%     pcchair@ijcai20.org
+% }
+
+% Multiple author syntax (remove the single-author syntax above and the \iffalse ... \fi here)
+% Check the ijcai20-multiauthor.tex file for detailed instructions
+% \iftrue
+% \author{
+% First Author$^1$
+% \and
+% Second Author$^2$\and
+% Third Author$^{2,3}$\And
+% Fourth Author$^4$
+% \affiliations
+% $^1$First Affiliation\\
+% $^2$Second Affiliation\\
+% $^3$Third Affiliation\\
+% $^4$Fourth Affiliation
+% \emails
+% \{first, second\}@example.com,
+% third@other.example.com,
+% fourth@example.com
+% }
+% \fi
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    In this paper,  we propose a novel unsupervised adaptive person re-identification method for distributed edge computing environments.The core of the method is to solve the problem of non-independent and identical training data distribution of edge devices in a distributed environment and mining cross-camera pedestrian relationships in a distributed environment.
+    In the field of traditional person re-identification, whenever a new data distribution is encountered, it is necessary to aggregate the data of the labeled source domain and the unlabeled target domain for incremental training.  Under the circumstance that the privacy protection of personal data is being paid more  attention, it is obviously inappropriate to collect and store pedestrian data on a large scale.Combined with the popular use of edge computing devices such as jetson tx2 in recent years, we set up the following distributed scenarios: edge devices have the ability to train models, edge devices can only get pedestrian data collected by local cameras, and between edge devices No exchange of pedestrian raw image data is allowed.
+    In the above scenario, our method is mainly divided into 4 stages: (1) edge device data style transfer (2) random jump training (3) cross-camera relationship mining and (4) random jump incremental training.
+    Our experiments on the main pedestrian re-identification dataset have proved the effectiveness of the method. In addition, we also analyzed the model training time, inference time, and data interaction bandwidth on the jetson tx2 development board. Prove the practicality of the method
+    
+\end{abstract}
+
+\section{Introduction}
+.....
+
+\subsection{subsection}
+.....
+
+\section{Related work}
+....
+
+\subsection{subsection}
+....
+
+..
+
+\section{Method}
+\paragraph{Definition} 
+
+\subsection{Single Camera style Transfer}
+
+\subsection{Random Walk Training}
+
+\subsection{subsection3}
+\subsection{subsection4}
+\subsection{subsection5}
+
+\section{Experiment}
+\subsection{datasets}
+
+All experiments are evaluated on three large-scale image person re-identification datasets(Market-1501~\cite{zheng2015scalable}, DukeMTMC-reID~\cite{ristani2016performance,zheng2017unlabeled} and MSMT17~\cite{wei2018person} )and one video person re-identification dataset(Mars~\cite{zheng2016mars}). Performance is evaluated by the cumulative matching characteristic (CMC) and mean Average Precision (mAP).
+
+\subsection{Experimental Setup}
+
+
+\subsubsection{Style Transfer Model}
+As introduced in section 3.2,  we employ Cycle-GAN~\cite{zhu2017unpaired} as the style transfer model. In each dataset, we choose camera 1 as the target domain for other camera performing a style transfer. we follow the parameter settings of, we resize all images to $256\times 256$ and set the batch size = 1. Beside, the learning rate is 0.0001 for the Discriminator and 0.0002 for the Generator.
+
+\subsubsection{Person Re-identification Model}
+We use ResNet-50~\cite{he2016deep} pre-trained on ImageNet~\cite{deng2009imagenet} as our backbone network. Considering the limited computing resources on the edge device, we fix the first two residual layers of ResNet-50, the input image resizes to $256\times128$. When training, we use random flip, random cut, random erase~\cite{zhong2017random} for data augmentation. we set the learning rate = 0.1 and use SGD optimizer to train the model.The batch size is set to 0.1.Each edge device needs to be trained for 6 epochs, 8 epochs, 3 epochs, 6 epochs when trained on Market-1501, DukeMTMC-reID, MSMT17 and MARS. In testing, we extract the L2-normalized output of Pooling-5 layer as the image feature and adopt the Euclidean distance to measure the similarities between query and gallery images, which reference ~\cite{zhong2019invariance}
+
+\subsubsection{Baseline}
+We use ResNet50 pre-trained on ImageNet as the experimental baseline.
+
+\subsection{Parameter Analysis}
+We first perform a sensitivity analysis on the hyper-parameter in our experiments.As mentioned in 3.4, the indicator of whether the two memories are of the same type in the clustering process is that they form at least $\alpha$ triangles in the relationship network. We will experiment with different $\alpha$ values in different datasets to detect clustering effects.
+
+Fig 3.1 shows the clustering results when the value of $\alpha$ is 0, 1, 2, 3 on the three datasets of market, duke, and mars. The results show that when the value of $\alpha$ is larger, it is difficult for most memories to establish connected edges with other memories in the relationship network and that means we will get more categories.When $\alpha$ is set to 0, the number of categories after clustering is less than the actual number of categories on all three datasets. Figure 3.2 shows the performance of the model after incremental training using the corresponding clustering results. The performance is optimal when $\alpha$ = 1 on the market dataset, the best performance is $\alpha$ = 2 on the duke dataset, and on the mars dataset, the performance is optimal when $\alpha$ = 1. On three datasets, when $\alpha$ = 0, the effect is worse than before the incremental training, which proves that the clustering has no effect.
+
+
+\subsection{Evaluation}
+
+\subsubsection{Baseline Performance}
+Table 1 shows the results of the baseline .We tested the model pre-trained on ImageNet directly(called Direct Transfer) on the target testing dataset and found that the effect was very poor. For example, the rank-1 on the market dataset was only $10.0\%$, and the mAP was only $3.0\%$. when we train the baseline model on the labeled training set and then test it on the testing set,  the baseline (called Supervised Learning) achieves high accuracy.
+
+\subsubsection{Ablation experiment}
+To prove the effectiveness of our proposed method,  we conduct ablation studies in Table 1.We first show the effectiveness of random jump training.....Secondly we will show the effectiveness of style transfer......Finally We will show the effectiveness of clustering......
+
+
+\subsubsection{Distributed Performance}
+\paragraph{Run-time analysis}
+We performed model run-time analysis on NVIDIA JETSON TX2. As shown in Table 4, we counted the run-time of the style transfer model inference module, person re-identification model inference module, person re-identification model training module, style transfer model training module and memory retrieval module on jetson tx2. The style transfer model inference module and the person re-identification model inference module count the time it takes to process an image, and the style transfer model training module and the person re-identification training module count the time it takes to train each mini-batch of data.
+
+\paragraph{Communication packet analysis} 
+We have statistics on the data packets that the system needs to interact with in a distributed environment. The main types and sizes of data packets are statistically summarized. The statistical results are shown in Table 5.
+
+
+\section{Conclusion}
+....
+
+\section{Acknowledgements}
+....
+
+%% The file named.bst is a bibliography style file for BibTeX 0.99c
+\bibliographystyle{named}
+\bibliography{ijcai20}
+
+\end{document}
+
