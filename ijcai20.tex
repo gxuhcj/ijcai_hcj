@@ -161,6 +161,7 @@ where $memory_{n}^{m}$ means the memory of the $n$-th tracklet in $m$-th camera.
 
 We designed the method named $mutual \ top1$ to initialize the relationship graph. As shown in fig.3b, Suppose we have two memory banks from camera a and camera b, which named $MB^{a}$ and $MB^{b}$. $memory_{t}^{a}$ is the memory of the $t$-th tracklet in camera a and $memory_{k}^{b}$ is the memory of the $k$-th tracklet in camera b. We use the $L2$ distance to measure the pairwise similarities between $memory_{t}^{a}$ and all memories in $MB^{b}$ and also measure the pairwise similarities between $memory_{k}^{b}$ and all memories in $MB^{a}$.if $memory_{k}^{b}$ has the  minimal pairwise distance with $memory_{t}^{a}$ and  $memory_{t}^{a}$ has the minimal pairwise distance with $memory_{k}^{b}$, we say both of them satify $mutual \ top1$ and we will establish connecting edges for them in the relationship graph.
 
+In a distributed environment, each $memory$ will maintain a neighbor list.Establishing connected edges in the relationship graph means update the neighbor lists of two $memories$ that satisfy the $mutual \ top1$.
 
 \paragraph{Triangle Relation}
 
