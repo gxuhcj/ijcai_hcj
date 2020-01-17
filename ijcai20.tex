@@ -161,16 +161,28 @@ where $memory_{n}^{m}$ means the memory of the $n$-th tracklet in $m$-th camera.
 
 We designed the method named $mutual \ top1$ to initialize the relationship graph. As shown in fig.3b, Suppose we have two memory banks from camera a and camera b, which named $MB^{a}$ and $MB^{b}$. $memory_{t}^{a}$ is the memory of the $t$-th tracklet in camera a and $memory_{k}^{b}$ is the memory of the $k$-th tracklet in camera b. We use the $L2$ distance to measure the pairwise similarities between $memory_{t}^{a}$ and all memories in $MB^{b}$ and also measure the pairwise similarities between $memory_{k}^{b}$ and all memories in $MB^{a}$.if $memory_{k}^{b}$ has the  minimal pairwise distance with $memory_{t}^{a}$ and  $memory_{t}^{a}$ has the minimal pairwise distance with $memory_{k}^{b}$, we say both of them satify $mutual \ top1$ and we will establish connecting edges for them in the relationship graph.
 
-In a distributed environment, each $memory$ will maintain a neighbor list.Establishing connected edges in the relationship graph means update the neighbor lists of two $memories$ that satisfy the $mutual \ top1$.
+In a distributed environment, each $memory$ will maintain a neighbor list.Establishing connected edges in the relationship graph means update the neighbor lists of two $memories$ that satisfying the $mutual \ top1$.
 
-\paragraph{Triangle Relation}
+\paragraph{Triangle Relation}As shown in Fig.3c, in the relationship graph constructed from $mutual \ top1$, a wrong connected edge may bring ``butterfly effect'', which will greatly affect the clustering effect. In order to ensure the accuracy of the connected edges in the relationship graph as much as possible, we propose a  method named $triangle \ relation$. As shown in fig.3d, two memories satisfying $triangle \ relation$ means that at least $\alpha$ memories exists in the relationship graph can establish a connected edge with both of them. 
 
-\paragraph{Global Label}
 
-\subsection{Incremental Training}
-...
+In a distributed environment, each $memory$ will compare its neighbor list with the neighbor list of its neighbors to find if there have at least $\alpha$ public neighbors, and then delete the neighbors that do not meet the conditions from its neighbor list.
+
+\paragraph{Global Label}For further incremental training, we need to assign a globally identifiable label $g_{n}^{m}$ to each memory based on the clustering results obtained from the relationship graph.
+
+
+In a distributed environment, each memory sends its neighbor list to its neighbors. Each memory will expand its neighbor list according to the received list. If there is an update, it will continue to flood the latest neighbor list to its neighbors. When the above process ends, the same type of memory will have the same neighbor list, which is equivalent to having globally recognizable labels.
+
+\subsection{Incremental Random Walk Training}
+The incremental random walk training settings are basically the same as the random walk training settings. The difference is that the classification layer of the model is initialized according to the number of global categories after clustering, and the training data uses global labels. The incremental training cross-entropy loss is formulated as:
+\begin{equation}
+    \begin{aligned}
+        \nu _{incremental}=-\frac{1}{\sum_{n=1}^{N} K_{n}}\sum_{n=1}^{N}\sum_{k=1}^{K_{n}}\log p(g_{n}^{m}\mid I_{k}^{t_{n}^{m}})
+    \end{aligned}
+    \end{equation}
+
 \subsection{Global Model Unification}
-...
+Each edge device stores a model locally, in order to better improve the accuracy of system retrieval, we propose two methods to unify models on all edge devices. The first one is that all edge devices use the model on the target device which is randomly selected. The second one is fusion models of all edge devices and calculate the average model, all edge devices will adopt the average model. In the experiment we used the first method.
 \section{Experiment}
 \subsection{datasets}
 
