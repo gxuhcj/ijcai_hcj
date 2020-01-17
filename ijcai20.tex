@@ -116,6 +116,9 @@
 
 ..
 
+
+
+
 \section{Method}
 \paragraph{Definition} 
 In a distributed environment,we adopt the sparse space-time tracklets sampling(SSTT)~\cite{li2018unsupervised} to sample the training tracklets from each camera. Each tracklet is represented as$\left \{t_{n}^{m}, y_{n}^{m}, g_{n}^{m}\right \}$, where $t_{n}^{m}$ means the $n$-th tracklet in $m$-th camera.Denoting $t_{n}^{m}=\left \{  I_{1}^{t_{n}^{m}},  I_{2}^{t_{n}^{m}},...,I_{k}^{t_{n}^{m}} \right \}$, where $I_{k}^{t_{n}^{m}}$ is the $k$-th image of the $n$-th tracklet in $m$-th camera. Each tracklet has two labels, one is a local label and the other is a global label.The local label is represented by $y_{n}^{m}$, whenever the edge device collects new tracklet data, it will automatically be assigned a local label, local labels are distinguishable only in local data and will be used for random walk training. The global label is represented by $g_{n}^{m}$, when distributed clustering is completed, each tracklet will obtain a global label, global labels are distinguishable in global data and will be used for incremental training.$f_{model}$ is the person re-identically model to extract high-dimensional features of input images.
@@ -151,8 +154,34 @@ where $N$ is the number of local tracklets and $K_{n}$ is the number of images t
 
 The model initialized on each edge device is ResNet-50 pre-trained on ImageNet, we fix the first two residual layers of ResNet-50 to save computing costs. At the same time, the classification layer of the network will re-initialize the weights for training on each edge device based on local data, so as shown in the fig.n, the model of random walk between edge devices is only the middle part of the entire network structure.
 
+
+
+\renewcommand\arraystretch{1.5}
+\begin{table*}
+\centering
+\begin{tabular}{c|c c c|c c c|c c c|c c c}
+\hline
+% Scenario  & $\delta$ & Runtime \\
+\multirow{2}{*}{method} & 
+\multicolumn{3}{c|}{Market} & \multicolumn{3}{c|}{DukeMTMC} & \multicolumn{3}{c|}{MARS} & \multicolumn{3}{c}{MSMT17} \\
+\cline{2-13} 
+& R-1 & R-5 & mAP & R-1 & R-5 & mAP & R-1 & R-5 & mAP & R-1 & R-5 & mAP\\ \hline
+\hline
+baseline & 8.4   & 17.5  &  2.3 &  7.3 & 13.8  &  2.1  &  6.5  & 13.9  &  2.8  & 3.8   & 7.6    &  0.7  \\
+rw       & 60.0  & 73.0  & 35.6 & 52.3 & 68.1  & 33.7  & 40.2  & 56.1  & 23.9  & 9.8   & 12.7   &  3.1  \\
+rw+t     & 76.8  & 88.7  & 51.8 & 59.2 & 73.8  & 36.6  & 44.0  & 60.9  & 26.3  & 25.2  & 38.8   &  8.9  \\
+rw+t+i   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8  & 45.9  & 61.7  & 26.6  & x.xx  & x.xx   &  x.xx  \\
+\hline
+\end{tabular}
+\caption{Latex default table}
+\label{tab:plain}
+\end{table*}
+
+
+
+
 \subsection{Distributed Clustering}
-\paragraph{Memory Bank}To mine relationships between cross-camera tracklets, we need to extract high-dimensional feature vectors for each trackle. We call the high-dimensional feature vector of each tracklet $memory$, the $memory$ is obtained as follows:
+\paragraph{Memory Bank}To mine relationships between cross camera tracklets, we need to extract high-dimensional feature vectors for each trackle. We call the high-dimensional feature vector of each tracklet $memory$, the $memory$ is obtained as follows:
 \begin{equation}
 \begin{aligned}
 memory_{n}^{m} = \sum_{k=1}^{K_{n}}f_{model}(I_{k}^{t_{n}^{m}})
@@ -188,27 +217,6 @@ The incremental random walk training settings are basically the same as the rand
 Each edge device stores a model locally, in order to better improve the accuracy of system retrieval, we propose two methods to unify models on all edge devices. The first one is that all edge devices use the model on the target device which is randomly selected. The second one is fusion models of all edge devices and calculate the average model, all edge devices will adopt the average model. In the experiment we used the first method.
 
 
-\renewcommand\arraystretch{1.5}
-\begin{table*}
-\centering
-\begin{tabular}{c|c c c|c c c|c c c|c c c}
-\hline
-% Scenario  & $\delta$ & Runtime \\
-\multirow{2}{*}{methond} & 
-\multicolumn{3}{c|}{Market} & \multicolumn{3}{c|}{DukeMTMC} & \multicolumn{3}{c|}{MARS} & \multicolumn{3}{c}{MSMT17} \\
-\cline{2-13} 
-& R-1 & R-5 & mAP & R-1 & R-5 & mAP & R-1 & R-5 & mAP & R-1 & R-5 & mAP\\ \hline
-\hline
-baseline & 8.4   & 17.5  &  2.3 &  7.3 & 13.8  &  2.1  &  6.5  & 13.9  &  2.8  & x.xx  & x.xx   &  x.xx  \\
-rw       & 60.0  & 73.0  & 35.6 & 52.3 & 68.1  & 33.7  & 40.2  & 56.1  & 23.9  & 9.8   & 12.7   &  3.1  \\
-rw+t     & 76.8  & 88.7  & 51.8 & 59.2 & 73.8  & 36.6  & 44.0  & 60.9  & 26.3  & 25.2  & 38.8   &  8.9  \\
-rw+t+i   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8  & 45.9  & 61.7  & 26.6  & x.xx  & x.xx   &  x.xx  \\
-\hline
-\end{tabular}
-\caption{Latex default table}
-\label{tab:plain}
-\end{table*}
-
 
 
 \section{Experiment}
@@ -238,18 +246,54 @@ Fig 3.1 shows the clustering results when the value of $\alpha$ is 0, 1, 2, 3 on
 \subsection{Evaluation}
 
 \subsubsection{Baseline Performance}
-Table 1 shows the results of the baseline .We tested the model pre-trained on ImageNet directly(called Direct Transfer) on the target testing dataset and found that the effect was very poor. For example, the rank-1 on the market dataset was only $10.0\%$, and the mAP was only $3.0\%$. when we train the baseline model on the labeled training set and then test it on the testing set,  the baseline (called Supervised Learning) achieves high accuracy.
+Table 1 shows the results of the baseline .We tested the model pre-trained on ImageNet directly(called Direct Transfer) on the target testing dataset and found that the effect was very poor. For example, the rank-1 on the market dataset was only $8.4\%$, and the mAP was only $2.3\%$. 
 
 \subsubsection{Ablation experiment}
-To prove the effectiveness of our proposed method,  we conduct ablation studies in Table 1.We first show the effectiveness of random jump training.....Secondly we will show the effectiveness of style transfer......Finally We will show the effectiveness of clustering......
+To prove the effectiveness of our proposed method,  we conduct ablation studies in Table 1.We first show the effectiveness of random walk training.....Secondly we will show the effectiveness of style transfer......Finally We will show the effectiveness of clustering......
 
 
 \subsubsection{Distributed Performance}
+
+
+\begin{table}
+\centering
+\begin{tabular}{c|c}
+\hline
+module  & time(ms) \\
+\hline
+style transfer model inference(per image)   & 0.1s  \\
+person re-id model inference(per image)     & 0.2s  \\
+style transfer model training(batchsize=128)    & 0.1s  \\
+person re-id model training(batchsize=1)      & 0.1s  \\
+\hline
+\end{tabular}
+\caption{Run time of each module}
+\label{tab:plain}
+\end{table}
+
+
 \paragraph{Run-time analysis}
-We performed model run-time analysis on NVIDIA JETSON TX2. As shown in Table 4, we counted the run-time of the style transfer model inference module, person re-identification model inference module, person re-identification model training module, style transfer model training module and memory retrieval module on jetson tx2. The style transfer model inference module and the person re-identification model inference module count the time it takes to process an image, and the style transfer model training module and the person re-identification training module count the time it takes to train each mini-batch of data.
+We performed model run-time analysis on NVIDIA JETSON TX2. As shown in Table 2, we counted the run-time of the style transfer model inference module, person re-identification model inference module, person re-identification model training module and style transfer model training module  on jetson tx2. The style transfer model inference module and the person re-identification model inference module count the time it takes to process an image, and the style transfer model training module and the person re-identification training module count the time it takes to train each mini-batch of data.
+
+
+\begin{table}
+\centering
+\begin{tabular}{c|c}
+\hline
+data packets  & size(Kb) \\
+\hline
+style transfer model inference   & 0.1s  \\
+person re-id model inference     & 0.2s  \\
+style transfer model training    & 0.1s  \\
+person re-id model training      & 0.1s  \\
+\hline
+\end{tabular}
+\caption{Latex default table}
+\label{tab:plain}
+\end{table}
 
 \paragraph{Communication packet analysis} 
-We have statistics on the data packets that the system needs to interact with in a distributed environment. The main types and sizes of data packets are statistically summarized. The statistical results are shown in Table 5.
+We have statistics on the data packets that the system needs to interact with in a distributed environment. The main types and sizes of data packets are statistically summarized. The statistical results are shown in Table 3.
 
 
 \section{Conclusion}
