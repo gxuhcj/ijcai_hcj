@@ -26,6 +26,8 @@
 \usepackage{multicol}
 \usepackage{multirow}
 \usepackage{array}
+\usepackage{graphicx}
+\usepackage{subfigure}
 \urlstyle{same}
 
 % the following package is optional:
@@ -118,7 +120,8 @@
 
 
 \begin{figure}[htb]
-    \includegraphics[width=9cm,height=6.5cm]{fig_1.pdf}
+    
+    \includegraphics[width=8cm,height=5.5cm]{fig_1.pdf}
     \caption{}
     \label{}
 \end{figure}
@@ -130,7 +133,7 @@ In a distributed environment,we adopt the sparse space-time tracklets sampling(S
 
 
 \begin{figure*}[htb]
-    \includegraphics[width=18cm,height=5cm]{fig_2.pdf}
+    \includegraphics[width=17cm,height=4cm]{fig_2.pdf}
     \caption{}
     \label{}
 \end{figure*}
@@ -138,9 +141,8 @@ In a distributed environment,we adopt the sparse space-time tracklets sampling(S
 
 
 
-
 \subsection{Single Camera style Transfer}
-In order to minimize the negative impact of non-Independent and identically distributed(non-IID) in the distributed environment on model performance, each edge device will transform the locally collected data to the target domain through the style transfer. When each edge device is initialized, it will obtain the same pedestrian data as the target domain data for style transfer. Fig.3 describes the above process. we adopt Cycle-GAN~\cite{zhu2017unpaired} as the style transfer model. Given two different domains $A$ and $B$, the goal of Cycle-GAN is to train two mapping networks $G$ and $F$ so that the distribution of $G(A)$ is as close as possible to the distribution of B and the distribution of $F(B)$ is as close as possible The distribution of A, The overall CycleGAN loss function is expressed as:
+In order to minimize the negative impact of non-Independent and identically distributed(non-IID) in the distributed environment on model performance, each edge device will transform the locally collected data to the target domain through the style transfer. When each edge device is initialized, it will obtain the same pedestrian data as the target domain data for style transfer. we adopt Cycle-GAN~\cite{zhu2017unpaired} as the style transfer model. Given two different domains $A$ and $B$, the goal of Cycle-GAN is to train two mapping networks $G$ and $F$ so that the distribution of $G(A)$ is as close as possible to the distribution of B and the distribution of $F(B)$ is as close as possible The distribution of A, The overall CycleGAN loss function is expressed as:
 \begin{equation}
 \begin{aligned}
 \upsilon (G,F,D_{A},D_{B})&=\upsilon_{GAN}(G,D_{B},A,B)\\
@@ -237,10 +239,46 @@ The incremental random walk training settings are basically the same as the rand
 \end{aligned}
 \end{equation}
 
+
+\begin{figure}[htb]
+    \includegraphics[width=8cm,height=4cm]{fig4_all.pdf}
+    \caption{}
+    \label{}
+\end{figure}
+
+
+
+
 \subsection{Global Model Unification}
 Each edge device stores a model locally, in order to better improve the accuracy of system retrieval, we propose two methods to unify models on all edge devices. The first one is that all edge devices use the model on the target device which is randomly selected. The second one is fusion models of all edge devices and calculate the average model, all edge devices will adopt the average model. In the experiment we used the first method.
 
 
+
+
+% \begin{figure*}[htbp]
+% \subfigure[pic2]{
+% \includegraphics[width=3cm,height=3cm]{fig3b_1.pdf}
+% }
+% \subfigure[pic3]{
+% \includegraphics[width=3cm,height=3cm]{fig3b_2.pdf}
+% }
+% \subfigure[pic4]{
+% \includegraphics[width=3cm,height=3cm]{fig3c.pdf}
+% }
+% \subfigure[pic4]{
+% \includegraphics[width=3cm,height=3cm]{fig3d_1.pdf}
+% }
+% \subfigure[pic4]{
+% \includegraphics[width=3cm,height=3cm]{fig3d_2.pdf}
+% }
+% \caption{pics}
+% \end{figure*}
+
+\begin{figure*}[htb]
+    \includegraphics[width=17.5cm,height=6.5cm]{fig3_all.pdf}
+    \caption{}
+    \label{}
+\end{figure*}
 
 
 \section{Experiment}
@@ -260,6 +298,19 @@ We use ResNet-50~\cite{he2016deep} pre-trained on ImageNet~\cite{deng2009imagene
 
 \subsubsection{Baseline}
 We use ResNet50 pre-trained on ImageNet as the experimental baseline.
+
+
+
+
+\begin{figure}[htb]
+    
+    \includegraphics[width=8.5cm,height=3.5cm]{fig5_all.pdf}
+    \caption{}
+    \label{}
+\end{figure}
+
+
+
 
 \subsection{Parameter Analysis}
 We first perform a sensitivity analysis on the hyper-parameter in our experiments.As mentioned in section3.4, the indicator of whether the two memories are of the same type in the clustering process is that they form at least $\alpha$ triangles in the relationship graph. We will experiment with different $\alpha$ values in different datasets to detect clustering effects.
