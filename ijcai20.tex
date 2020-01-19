@@ -120,8 +120,7 @@
 
 
 \begin{figure}[htb]
-    
-    \includegraphics[width=8cm,height=5.5cm]{fig_1.pdf}
+    \centerline{ \includegraphics[width=7cm,height=5cm]{fig_1.pdf}}
     \caption{}
     \label{}
 \end{figure}
@@ -139,6 +138,16 @@ In a distributed environment,we adopt the sparse space-time tracklets sampling(S
 \end{figure*}
 
 
+
+\subsection{Overview}
+Our framework is mainly divided into the following functional modules: style transfer module, random walk training module, clustering module, incremental training module, and global unified module. The style transfer module is mainly responsible for style transfer of the collected pedestrian tracklet data, the edge device will save the data after the style transfer to the local and assign a local label. The random walk training module is mainly responsible for model training using locally saved pedestrian data and local labels. The trained model will replace the local model and randomly select the next hop to continue training. The process of style transfer and local training is shown in Fig.2 . The next is a memory-based clustering module, as shown in Fig.3 , memory is a high-dimensional feature fusion of pedestrian tracklet, and memoryBank is a collection of local memories.The clustering module will interchanges memoryBank between edge devices and builds neighbor list for each memory according to "mutual top1" and "Triangle Relation" mentioned in section 3.3. We can obtain the global label of each memory through the neighbor relationship between the memories. The incremental random walk training module will use the local data of the edge device and its global labels to incrementally train the model. Finally, the global unification module will unify the models on all edge devices.
+
+
+\begin{figure}[htb]
+    \centerline{\includegraphics[width=7cm,height=3cm]{fig_memory.pdf}}
+    \caption{}
+    \label{}
+\end{figure}
 
 
 \subsection{Single Camera style Transfer}
@@ -161,7 +170,11 @@ where $x\in A$ and $y\in B$
 
 
 
-
+\begin{figure*}[htb]
+    \includegraphics[width=17.5cm,height=6.5cm]{fig3_all.pdf}
+    \caption{}
+    \label{}
+\end{figure*}
 
 
 
@@ -182,26 +195,7 @@ The model initialized on each edge device is ResNet-50 pre-trained on ImageNet, 
 
 
 
-\renewcommand\arraystretch{1.5}
-\begin{table*}
-\centering
-\begin{tabular}{c|c c c|c c c|c c c|c c c}
-\hline
-% Scenario  & $\delta$ & Runtime \\
-\multirow{2}{*}{method} & 
-\multicolumn{3}{c|}{Market} & \multicolumn{3}{c|}{DukeMTMC} & \multicolumn{3}{c|}{MARS} & \multicolumn{3}{c}{MSMT17} \\
-\cline{2-13} 
-& R-1 & R-5 & mAP & R-1 & R-5 & mAP & R-1 & R-5 & mAP & R-1 & R-5 & mAP\\ \hline
-\hline
-baseline & 8.4   & 17.5  &  2.3 &  7.3 & 13.8  &  2.1  &  6.5  & 13.9  &  2.8  & 3.8   & 7.6    &  0.7  \\
-rw       & 60.0  & 73.0  & 35.6 & 52.3 & 68.1  & 33.7  & 40.2  & 56.1  & 23.9  & 9.8   & 12.7   &  3.1  \\
-rw+t     & 76.8  & 88.7  & 51.8 & 59.2 & 73.8  & 36.6  & 44.0  & 60.9  & 26.3  & 25.2  & 38.8   &  8.9  \\
-rw+t+i   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8  & 45.9  & 61.7  & 26.6  & 28.6  & 42.1   &  10.0  \\
-\hline
-\end{tabular}
-\caption{Latex default table}
-\label{tab:plain}
-\end{table*}
+
 
 
 
@@ -274,11 +268,29 @@ Each edge device stores a model locally, in order to better improve the accuracy
 % \caption{pics}
 % \end{figure*}
 
-\begin{figure*}[htb]
-    \includegraphics[width=17.5cm,height=6.5cm]{fig3_all.pdf}
-    \caption{}
-    \label{}
-\end{figure*}
+
+
+\renewcommand\arraystretch{1.5}
+\begin{table*}
+\centering
+\begin{tabular}{c|c c c|c c c|c c c|c c c}
+\hline
+% Scenario  & $\delta$ & Runtime \\
+\multirow{2}{*}{method} & 
+\multicolumn{3}{c|}{Market} & \multicolumn{3}{c|}{DukeMTMC} & \multicolumn{3}{c|}{MARS} & \multicolumn{3}{c}{MSMT17} \\
+\cline{2-13} 
+& R-1 & R-5 & mAP & R-1 & R-5 & mAP & R-1 & R-5 & mAP & R-1 & R-5 & mAP\\ \hline
+\hline
+baseline & 8.4   & 17.5  &  2.3 &  7.3 & 13.8  &  2.1  &  6.5  & 13.9  &  2.8  & 3.8   & 7.6    &  0.7  \\
+rw       & 60.0  & 73.0  & 35.6 & 52.3 & 68.1  & 33.7  & 40.2  & 56.1  & 23.9  & 9.8   & 12.7   &  3.1  \\
+rw+t     & 76.8  & 88.7  & 51.8 & 59.2 & 73.8  & 36.6  & 44.0  & 60.9  & 26.3  & 25.2  & 38.8   &  8.9  \\
+rw+t+i   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8  & 45.9  & 61.7  & 26.6  & 28.6  & 42.1   &  10.0  \\
+\hline
+\end{tabular}
+\caption{Latex default table}
+\label{tab:plain}
+\end{table*}
+
 
 
 \section{Experiment}
@@ -373,6 +385,46 @@ We have statistics on the data packets that the system needs to interact with in
 
 \section{Conclusion}
 ....
+
+
+
+
+\renewcommand\arraystretch{1.5}
+\begin{table*}
+\centering
+\begin{tabular}{c|c c c|c c c}
+\hline
+% Scenario  & $\delta$ & Runtime \\
+\multirow{2}{*}{method} & 
+\multicolumn{3}{c|}{Market} & \multicolumn{3}{c}{DukeMTMC}\\
+\cline{2-7} 
+& R-1 & R-5 & mAP & R-1 & R-5 & mAP\\ \hline
+\hline
+LOMO & 8.4   & 17.5  &  2.3 &  7.3 & 13.8  &  2.1    \\
+Bow       & 60.0  & 73.0  & 35.6 & 52.3 & 68.1  & 33.7    \\
+UMDL     & 76.8  & 88.7  & 51.8 & 59.2 & 73.8  & 36.6    \\
+PTGAN   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8   \\
+PUL   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8   \\
+SPGAN   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8   \\
+CAMEL   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8   \\
+MMFA   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8   \\
+SPGAN+LMP   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8   \\
+Tj-AIDL   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8   \\
+CamStyle   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8   \\
+HHL   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8   \\
+\hline
+Ours   & 79.4  & 90.6  & 55.5 & 61.3 & 76.0  & 36.8   \\
+\hline
+\end{tabular}
+\caption{Latex default table}
+\label{tab:plain}
+\end{table*}
+
+
+
+
+
+
 
 \section{Acknowledgements}
 ....
